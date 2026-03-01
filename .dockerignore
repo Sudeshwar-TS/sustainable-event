@@ -1,0 +1,11 @@
+# Ignore Python artifacts
+venv
+__pycache__
+*.pyc
+
+# Node artifacts
+frontend/node_modules
+# do not ignore build output (.next)
+
+# Git
+.git

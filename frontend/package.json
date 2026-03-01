@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "sustainawed-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "axios": "^1.0.0",
+    "debug": "^4.3.4",
+    "chart.js": "^4.0.0",
+    "jwt-decode": "^3.1.2",
+    "next": "13.4.12",
+    "react": "18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "25.3.2",
+    "@types/react": "19.2.14",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "typescript": "^5.0.4"
+  }
+}
