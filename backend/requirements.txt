@@ -11,3 +11,4 @@ qrcode[pil]
 Pillow
 email-validator
 bcrypt==4.0.1
+redis

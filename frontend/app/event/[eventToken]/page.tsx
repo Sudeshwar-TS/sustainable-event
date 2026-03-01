@@ -6,25 +6,19 @@ import api from "../../../services/api";
 
 export default function GuestPage() {
   const params = useParams();
-
-  // 🔴 IMPORTANT: Make sure this matches your folder name
-  // If folder is [eventToken] → use params.eventToken
-  // If folder is [token] → use params.token
   const eventToken = params.eventToken as string;
 
   const [form, setForm] = useState({
-  name: "",
-  phone: "",
-  password: "",   // ✅ ADD
-  number_of_people: 1,
-  transport_type: "",
-  parking_needed: "No",
-  needs_room: "No",
-});
+    name: "",
+    phone: "",
+    number_of_people: 1,
+    transport_type: "",
+    parking_needed: "No",
+    needs_room: "No",
+  });
 
   const [status, setStatus] = useState("");
 
-  // ✅ Safe change handler
   const handleChange = (e: any) => {
     const { name, value } = e.target;
 
@@ -41,28 +35,19 @@ export default function GuestPage() {
     e.preventDefault();
 
     try {
-      // 🔹 Get event by token
       const eventRes = await api.get(`/events/token/${eventToken}`);
       const eventId = eventRes.data.id;
 
-      // 🔹 Submit guest
       await api.post("/guests/", {
-        name: form.name,
-        phone: form.phone,
-        number_of_people: form.number_of_people,
-        transport_type: form.transport_type,
-        parking_needed: form.parking_needed,
-        needs_room: form.needs_room,
+        ...form,
         event_id: eventId,
       });
 
       setStatus("RSVP Submitted Successfully 🎉");
 
-      // 🔹 Reset form
       setForm({
         name: "",
         phone: "",
-        password: "",
         number_of_people: 1,
         transport_type: "",
         parking_needed: "No",

@@ -41,10 +41,12 @@ export default function CreateEvent() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  /* 🔐 Protect Page (Organizer Only) */
+  // 🔐 Role Protection (Organizer Only)
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "organizer") {
       router.replace("/login");
     }
   }, [router]);
@@ -81,9 +83,8 @@ export default function CreateEvent() {
 
       setQr(res.data.qr_code_url);
       setWeddingId(`WED-${new Date().getFullYear()}-${res.data.id}`);
-      showToast("Wedding event created successfully ✨", "success");
 
-      await api.post(`/predict/event/${res.data.id}`);
+      showToast("Wedding event created successfully ✨", "success");
 
     } catch (err) {
       const apiErr = err as AxiosError<ApiError>;
@@ -95,7 +96,6 @@ export default function CreateEvent() {
 
   return (
     <main className="min-h-screen py-24 flex items-center justify-center px-6">
-
       <div className="w-full max-w-3xl luxury-card">
 
         <div className="text-center mb-12">
@@ -208,7 +208,6 @@ export default function CreateEvent() {
         )}
 
       </div>
-
     </main>
   );
 }

@@ -8,7 +8,12 @@ from pydantic import BaseModel, EmailStr
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
-    password: str
+    phone: str
+
+
+class OrganizerRegister(BaseModel):
+    name: str
+    email: EmailStr
     phone: str
     expected_count: int
     hall_name: str
@@ -17,9 +22,13 @@ class UserCreate(BaseModel):
     bus_stops: str
 
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
+class OTPRequest(BaseModel):
+    phone: str
+
+
+class OTPVerify(BaseModel):
+    phone: str
+    otp: str
 
 
 class UserOut(BaseModel):
@@ -33,6 +42,16 @@ class UserOut(BaseModel):
 
 
 # ---------------- EVENT ----------------
+
+class EventCreate(BaseModel):
+    event_name: str
+    location: Optional[str] = None
+    hall_name: Optional[str] = None
+    bus_routes: Optional[str] = None
+    bus_stops: Optional[str] = None
+    expected_count: Optional[int] = None
+    event_date: Optional[datetime] = None
+
 
 class EventOut(BaseModel):
     id: int
@@ -56,12 +75,12 @@ class EventOut(BaseModel):
 class GuestCreate(BaseModel):
     name: str
     phone: str
-    password: str
     number_of_people: int = 1
     transport_type: Optional[str] = None
     parking_needed: Optional[str] = None
     needs_room: Optional[str] = None
     event_id: int
+
 
 class GuestOut(BaseModel):
     id: int
@@ -69,14 +88,12 @@ class GuestOut(BaseModel):
     name: str
     phone: str
     number_of_people: int
-    transport_type: str
-    parking_needed: str
-    needs_room: str
+    transport_type: Optional[str] = None
+    parking_needed: Optional[str] = None
+    needs_room: Optional[str] = None
 
     class Config:
         from_attributes = True
-
-
 # ---------------- ATTENDANCE ----------------
 
 class AttendanceCreate(BaseModel):
@@ -94,8 +111,6 @@ class AttendanceOut(BaseModel):
 
     class Config:
         from_attributes = True
-
-
 # ---------------- SOS ----------------
 
 class SOSCreate(BaseModel):
@@ -108,19 +123,7 @@ class SOSOut(BaseModel):
     event_id: int
     guest_id: int
     triggered_at: datetime
-    resolved: Optional[str]
+    resolved: Optional[str] = None
 
     class Config:
         from_attributes = True
-
-# ---------------- EVENT ----------------
-
-class EventCreate(BaseModel):
-    user_id: int
-    event_name: str
-    location: str | None = None
-    hall_name: str | None = None
-    bus_routes: str | None = None
-    bus_stops: str | None = None
-    expected_count: int | None = None
-    event_date: datetime | None = None

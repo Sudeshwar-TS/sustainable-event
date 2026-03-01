@@ -53,7 +53,7 @@ class Guest(Base):
     event_id = Column(Integer, ForeignKey("events.id"))
 
     name = Column(String, nullable=False)
-    phone = Column(String, nullable=True)
+    phone = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     number_of_people = Column(Integer, default=1)
     transport_type = Column(String, nullable=True)
