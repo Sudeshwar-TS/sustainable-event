@@ -100,7 +100,7 @@ export default function GuestDashboard() {
   const invitationUrl = event.invitation_image
     ? event.invitation_image.startsWith('http')
       ? event.invitation_image
-      : `http://localhost:8000/${event.invitation_image.replace(/^\/+/, '')}`
+      : `https://sustainable-event-backend.onrender.com/${event.invitation_image.replace(/^\/+/, '')}`
     : event.invitation_image_url || '';
   const hasInviteBackground = Boolean(invitationUrl);
   const backgroundStyle = hasInviteBackground
