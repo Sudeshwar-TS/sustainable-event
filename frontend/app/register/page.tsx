@@ -68,6 +68,7 @@ export default function RegisterPage() {
     setError('');
 
     try {
+      console.log('Submitting registration with form values', form);
       const formData = new FormData();
       formData.append('name', form.name);
       formData.append('email', form.email);
@@ -76,8 +77,9 @@ export default function RegisterPage() {
       formData.append('event_date', form.event_date ? new Date(form.event_date).toISOString() : '');
       formData.append('location', form.location);
       formData.append('hall_name', form.hall_name);
-      formData.append('expected_count', form.expected_count);
-      formData.append('bus_routes', form.bus_routes);
+      // backend expects these keys
+      formData.append('expected_guests', form.expected_count);
+      formData.append('bus_route', form.bus_routes);
       formData.append('bus_stops', form.bus_stops);
       if (invitationFile) {
         formData.append('invitation_image', invitationFile);
@@ -87,9 +89,11 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      console.log('Registration response', res.data);
       setQr(res.data.qr_code_url);
       showToast('Registration successful! Your QR code is ready.', 'success');
     } catch (err) {
+      console.error('Registration error', err);
       const apiErr = err as AxiosError<ApiError>;
       const message = apiErr.response?.data?.detail || 'Registration failed.';
       setError(message);
