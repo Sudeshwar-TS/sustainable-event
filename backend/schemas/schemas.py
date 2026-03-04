@@ -15,11 +15,14 @@ class OrganizerRegister(BaseModel):
     name: str
     email: EmailStr
     phone: str
-    expected_count: int
-    hall_name: str
+    event_name: str
+    event_date: Optional[datetime] = None
     location: str
+    hall_name: str
     bus_routes: str
     bus_stops: str
+    expected_count: int
+    invitation_image_url: Optional[str] = None
 
 
 class OTPRequest(BaseModel):
@@ -51,6 +54,7 @@ class EventCreate(BaseModel):
     bus_stops: Optional[str] = None
     expected_count: Optional[int] = None
     event_date: Optional[datetime] = None
+    invitation_image: Optional[str] = None
 
 
 class EventOut(BaseModel):
@@ -58,13 +62,15 @@ class EventOut(BaseModel):
     user_id: int
     event_token: str
     event_name: str
-    hall_name: Optional[str]
-    location: Optional[str]
+    event_date: Optional[datetime]
+    location: str
+    hall_name: str
     bus_routes: Optional[str]
     bus_stops: Optional[str]
-    expected_count: Optional[int]
+    expected_count: int
+    invitation_image: Optional[str]
+    invitation_image_url: Optional[str]
     qr_code_url: Optional[str]
-    event_date: Optional[datetime]
 
     class Config:
         from_attributes = True
@@ -77,9 +83,19 @@ class GuestCreate(BaseModel):
     phone: str
     number_of_people: int = 1
     transport_type: Optional[str] = None
-    parking_needed: Optional[str] = None
+    parking_type: Optional[str] = "None"
     needs_room: Optional[str] = None
     event_id: int
+
+
+class GuestRSVPCreate(BaseModel):
+    name: str
+    phone: str
+    number_of_people: int = 1
+    transport_type: Optional[str] = None
+    parking_type: Optional[str] = "None"
+    needs_room: Optional[str] = None
+    event_token: str
 
 
 class GuestOut(BaseModel):
@@ -89,7 +105,7 @@ class GuestOut(BaseModel):
     phone: str
     number_of_people: int
     transport_type: Optional[str] = None
-    parking_needed: Optional[str] = None
+    parking_type: str
     needs_room: Optional[str] = None
 
     class Config:
@@ -123,7 +139,7 @@ class SOSOut(BaseModel):
     event_id: int
     guest_id: int
     triggered_at: datetime
-    resolved: Optional[str] = None
+    resolved: bool
 
     class Config:
         from_attributes = True

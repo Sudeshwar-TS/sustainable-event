@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String
 from database import Base
 
@@ -28,6 +28,7 @@ class Event(Base):
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     expected_count = Column(Integer, nullable=True)
+    invitation_image = Column(String, nullable=True)
     invitation_image_url = Column(String, nullable=True)
     qr_code_url = Column(String, nullable=True)
     event_date = Column(DateTime, default=datetime.utcnow)
@@ -54,11 +55,11 @@ class Guest(Base):
 
     name = Column(String, nullable=False)
     phone = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
+    password_hash = Column(String, nullable=True)  # OTP-only login, no password required
     number_of_people = Column(Integer, default=1)
     transport_type = Column(String, nullable=True)
 
-    parking_needed = Column(String, nullable=True)  # YES / NO
+    parking_type = Column(String, nullable=True)  # None / Car / Bike
     needs_room = Column(String, nullable=True)      # YES / NO
 
     event = relationship("Event", back_populates="guests")
@@ -83,8 +84,11 @@ class SOS(Base):
     id = Column(Integer, primary_key=True, index=True)
     event_id = Column(Integer, ForeignKey("events.id"))
     guest_id = Column(Integer, ForeignKey("guests.id"))
-    triggered_at = Column(DateTime, default=datetime.utcnow)
-    resolved = Column(String, default="false")
+    triggered_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc)
+    )
+    resolved = Column(Boolean, default=False, nullable=False)
 
     event = relationship("Event", back_populates="sos")
     guest = relationship("Guest", back_populates="sos")

@@ -1,36 +1,93 @@
-from fastapi import APIRouter, HTTPException, Depends
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import models, schemas
+
 from database import get_db
+from dependencies.auth import get_current_user
+from models.models import Event, Guest, SOS
+from schemas.schemas import SOSOut
 
 router = APIRouter(prefix="/sos", tags=["sos"])
 
 
 @router.post("/trigger")
-def trigger(sos: schemas.SOSCreate, db: Session = Depends(get_db)):
-    guest = db.query(models.Guest).filter(models.Guest.id == sos.guest_id).first()
+def trigger(
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if user.get("role") != "guest":
+        raise HTTPException(status_code=403, detail="Access forbidden")
+
+    guest = db.query(Guest).filter(Guest.id == int(user.get("sub"))).first()
     if not guest:
         raise HTTPException(status_code=404, detail="Guest not found")
-    event = db.query(models.Event).filter(models.Event.id == sos.event_id).first()
+
+    new_sos = SOS(
+        event_id=guest.event_id,
+        guest_id=guest.id,
+        triggered_at=datetime.now(timezone.utc),
+        resolved=False,
+    )
+    db.add(new_sos)
+    db.commit()
+    db.refresh(new_sos)
+
+    return {"message": "SOS alert sent", "sos_id": new_sos.id}
+
+
+@router.get("/active/{event_id}")
+def active_sos(
+    event_id: int,
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if user.get("role") != "organizer":
+        raise HTTPException(status_code=403, detail="Access forbidden")
+
+    event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
-    organizer = db.query(models.User).filter(models.User.id == event.user_id).first()
-    new = models.SOS(**sos.dict())
-    db.add(new)
-    db.commit()
-    db.refresh(new)
-    # mock notification to organizer
-    if organizer and organizer.phone:
-        print(f"[SOS] notifying organizer {organizer.phone} that guest {guest.name} needs help")
-    return {"sos": new, "organizer_phone": organizer.phone if organizer else None}
+    if event.user_id != int(user.get("sub")):
+        raise HTTPException(status_code=403, detail="Access forbidden")
+
+    alerts = (
+        db.query(SOS, Guest)
+        .join(Guest, Guest.id == SOS.guest_id)
+        .filter(SOS.event_id == event_id, SOS.resolved.is_(False))
+        .order_by(SOS.triggered_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": sos.id,
+            "guest_name": guest.name,
+            "guest_phone": guest.phone,
+            "triggered_at": sos.triggered_at,
+        }
+        for sos, guest in alerts
+    ]
 
 
-@router.post("/resolve/{sos_id}", response_model=schemas.SOSOut)
-def resolve(sos_id: int, db: Session = Depends(get_db)):
-    record = db.query(models.SOS).filter(models.SOS.id == sos_id).first()
+@router.put("/resolve/{sos_id}", response_model=SOSOut)
+def resolve_sos(
+    sos_id: int,
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if user.get("role") != "organizer":
+        raise HTTPException(status_code=403, detail="Access forbidden")
+
+    record = db.query(SOS).filter(SOS.id == sos_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="SOS not found")
-    record.resolved = "true"
+
+    event = db.query(Event).filter(Event.id == record.event_id).first()
+    if not event or event.user_id != int(user.get("sub")):
+        raise HTTPException(status_code=403, detail="Access forbidden")
+
+    record.resolved = True
     db.commit()
     db.refresh(record)
     return record

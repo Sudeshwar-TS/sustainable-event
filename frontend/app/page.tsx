@@ -2,33 +2,57 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-[80vh] py-24">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-center px-6">
-        <section className="w-full rounded-2xl bg-gradient-to-br from-slate-800/60 to-emerald-900/30 p-12 text-center shadow-lg backdrop-blur-sm ring-1 ring-white/5">
-          <p className="text-sm uppercase tracking-[0.25em] text-emerald-200">SustainaWed</p>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight text-white md:text-6xl">
-            Plan a Sustainable Wedding with AI
+    <section className="section-fade relative overflow-hidden py-20">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(198,167,94,0.25),transparent_58%)]" />
+
+      <div className="mx-auto max-w-7xl px-6 sm:px-10">
+        <div className="premium-card border border-[#C6A75E]/25 bg-white/85 text-center">
+          <p className="text-sm uppercase tracking-[0.25em] text-[var(--text-soft)]">SustainaWed</p>
+          <h1 className="mx-auto mt-6 max-w-4xl font-serif text-5xl leading-tight text-[var(--text-dark)] sm:text-6xl">
+            Make your Wedding Sustainable
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-emerald-100 md:text-xl">
-            Reduce food waste. Optimize resources. Make your wedding eco-friendly.
+          <p className="mx-auto mt-5 max-w-2xl text-[var(--text-soft)]">
+            Elegant planning for modern weddings with guest logistics, SOS alerts, invitation workflows, and smart organization in one platform.
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/register"
-              className="inline-flex min-w-[220px] items-center justify-center rounded-2xl bg-emerald-500 px-7 py-3 text-base font-semibold text-slate-900 transition hover:bg-emerald-400"
-            >
-              Create Wedding Event
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
+            <Link href="/register" className="gold-button inline-flex min-w-[220px] items-center justify-center">
+              Organizer Register
             </Link>
-            <Link
-              href="/dashboard/demo"
-              className="inline-flex min-w-[220px] items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-7 py-3 text-base font-semibold text-white transition hover:bg-white/10"
-            >
-              View Dashboard
+            <Link href="/login" className="secondary-button inline-flex min-w-[220px] items-center justify-center">
+              Guest Login
             </Link>
           </div>
-        </section>
+        </div>
+
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              title: 'Smart RSVP Experience',
+              desc: 'Collect guest details, parking preference, and room needs in a polished RSVP flow.',
+              icon: 'RS',
+            },
+            {
+              title: 'Live SOS Alerting',
+              desc: 'Guests can trigger SOS alerts while organizers receive real-time dashboard visibility.',
+              icon: 'SO',
+            },
+            {
+              title: 'Elegant Planning Insights',
+              desc: 'Track attendance, transport, and safety-buffer metrics with premium dashboard views.',
+              icon: 'IN',
+            },
+          ].map((feature) => (
+            <article key={feature.title} className="premium-card bg-white">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#1F4F46]/10 text-sm font-bold text-[#1F4F46]">
+                {feature.icon}
+              </span>
+              <h3 className="mt-4 text-xl font-semibold">{feature.title}</h3>
+              <p className="mt-2 text-[var(--text-soft)]">{feature.desc}</p>
+            </article>
+          ))}
+        </div>
       </div>
-    </main>
+    </section>
   );
 }

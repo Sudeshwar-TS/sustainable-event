@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from database import engine, Base, wait_for_db
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 
 # ✅ include events
 from routes import auth, events, guests, entrance, sos, dashboard, reminders
@@ -21,6 +23,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(auth.router)
 app.include_router(events.router)   # ✅ ADD THIS BACK

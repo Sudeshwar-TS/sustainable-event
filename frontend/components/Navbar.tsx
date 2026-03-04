@@ -1,32 +1,72 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <header className="w-full bg-white/80 backdrop-blur-md border-b border-amber-200 shadow-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        
-        <Link href="/" className="flex flex-col">
-          <span className="text-2xl font-serif text-amber-800 tracking-wide">
-            SustainaWed
-          </span>
-          <span className="text-xs text-amber-600">
-            Elegant Sustainable Weddings
-          </span>
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-[#C6A75E]/20">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <Link href="/" className="text-2xl sm:text-3xl font-serif text-[#1F4F46] hover:text-[#C6A75E] transition">
+          SustainaWed
         </Link>
 
-        <nav className="flex items-center gap-6 text-sm font-medium text-amber-900">
-          <Link href="/login" className="hover:text-amber-700 transition">
+        <div className="hidden md:flex items-center gap-6">
+          <Link
+            href="/login"
+            className="rounded-full px-6 py-2.5 text-white
+                       bg-gradient-to-r from-[#C6A75E] to-[#A88B4C]
+                       shadow-md hover:shadow-lg
+                       hover:scale-105 transition-all duration-300"
+          >
             Login
           </Link>
 
           <Link
             href="/register"
-            className="rounded-full bg-amber-700 px-6 py-2 text-white shadow-md hover:bg-amber-800 transition"
+            className="rounded-full px-6 py-2.5 text-white
+                       bg-gradient-to-r from-[#1F4F46] to-[#163E38]
+                       shadow-md hover:shadow-lg
+                       hover:scale-105 transition-all duration-300"
           >
             Organizer Register
           </Link>
-        </nav>
+        </div>
+
+        <button
+          className="md:hidden text-[#1F4F46]"
+          onClick={() => setOpen(!open)}
+        >
+          {open ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </div>
+
+      {open && (
+        <div className="md:hidden px-6 pb-6 space-y-4 bg-white/95 backdrop-blur-md">
+          <Link
+            href="/login"
+            onClick={() => setOpen(false)}
+            className="block w-full text-center rounded-full px-6 py-3 text-white
+                       bg-gradient-to-r from-[#C6A75E] to-[#A88B4C]
+                       shadow-md hover:scale-105 transition-all duration-300"
+          >
+            Login
+          </Link>
+
+          <Link
+            href="/register"
+            onClick={() => setOpen(false)}
+            className="block w-full text-center rounded-full px-6 py-3 text-white
+                       bg-gradient-to-r from-[#1F4F46] to-[#163E38]
+                       shadow-md hover:scale-105 transition-all duration-300"
+          >
+            Organizer Register
+          </Link>
+        </div>
+      )}
     </header>
   );
 }

@@ -3,6 +3,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/uploads:/app/uploads
     env_file:
       - ./.env
     

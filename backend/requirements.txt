@@ -12,3 +12,5 @@ Pillow
 email-validator
 bcrypt==4.0.1
 redis
+twilio
+python-multipart

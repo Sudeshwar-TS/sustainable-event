@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Manrope, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "../styles/globals.css";
-import Navbar from "../components/Navbar";
+import LayoutWrapper from "../components/LayoutWrapper";
 import { ToastProvider } from "../components/ToastContext";
+import { AuthProvider } from "../context/AuthContext";
 
-const manrope = Manrope({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-inter",
 });
 
 const playfair = Playfair_Display({
@@ -22,11 +23,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${playfair.variable} antialiased`}>
-        <ToastProvider>
-          <Navbar />
-          <main className="mx-auto w-full max-w-5xl px-6">{children}</main>
-        </ToastProvider>
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+        <AuthProvider>
+          <ToastProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

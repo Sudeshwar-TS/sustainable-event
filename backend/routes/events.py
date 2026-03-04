@@ -32,6 +32,7 @@ def create_event(
         bus_stops=event.bus_stops,
         expected_count=event.expected_count,
         event_date=event.event_date,
+        invitation_image=event.invitation_image,
         event_token=token
     )
 
@@ -156,5 +157,6 @@ def get_event_by_token(
         "hall_name": event.hall_name,
         "location": event.location,
         "bus_routes": event.bus_routes,
-        "bus_stops": event.bus_stops
+        "bus_stops": event.bus_stops,
+        "invitation_image": event.invitation_image
     }

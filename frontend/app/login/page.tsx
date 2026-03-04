@@ -1,59 +1,72 @@
 'use client';
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import api from "../../services/api";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import api from '../../services/api';
+import { useToast } from '../../components/ToastContext';
+import { formatPhoneForInput, normalizePhone } from '../../services/phone';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const { showToast } = useToast();
+
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
-      await api.post("/auth/request-otp", {
-        phone
-      });
+      const phoneClean = normalizePhone(phone);
+      await api.post('/auth/request-otp', { phone: phoneClean });
 
-      router.push(`/verify-otp?phone=${phone}`);
+      showToast('OTP sent to your phone.', 'success');
+      router.push(`/verify-otp?phone=${phoneClean}`);
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to send OTP");
+      const errorMsg = err.response?.data?.detail || 'Failed to send OTP';
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
-        <h1 className="text-2xl font-semibold mb-6">Login with OTP</h1>
+    <main className="min-h-[80vh] flex items-center justify-center px-6">
+      <section className="premium-card hover:-translate-y-2 transition-all duration-300 w-full max-w-xl text-center">
+        <h1 className="font-serif text-5xl">Cherish Your Celebration</h1>
+        <div className="h-px w-40 bg-gradient-to-r from-transparent via-[#C6A75E] to-transparent mx-auto my-6" />
+        <p className="text-[var(--text-soft)] mb-8">Sign in with OTP to continue managing your wedding moments.</p>
 
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-4 text-left">
           <input
-            type="text"
+            type="tel"
             placeholder="Enter mobile number"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhoneForInput(e.target.value))}
+            inputMode="numeric"
+            maxLength={11}
             required
-            className="w-full border p-3 rounded-xl"
+            className="premium-input"
           />
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-600 text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-600 text-white py-3 rounded-xl"
-          >
-            {loading ? "Sending OTP..." : "Send OTP"}
+          <button type="submit" disabled={loading} className="gold-button w-full disabled:opacity-60">
+            {loading ? 'Sending OTP...' : 'Send OTP'}
           </button>
         </form>
-      </div>
+
+        <p className="text-sm text-[var(--text-soft)] mt-7">
+          Don&apos;t have an account?{' '}
+          <a href="/register" className="text-[var(--gold-dark)] font-semibold">
+            Register here
+          </a>
+        </p>
+      </section>
     </main>
   );
 }

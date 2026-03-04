@@ -1,145 +1,161 @@
-"use client";
+'use client';
 
-import { useParams } from "next/navigation";
-import { useState } from "react";
-import api from "../../../services/api";
+import { AxiosError } from 'axios';
+import { useParams } from 'next/navigation';
+import { ChangeEvent, useState } from 'react';
+import LuxurySelect from '../../../components/LuxurySelect';
+import api from '../../../services/api';
+import { formatPhoneForInput, normalizePhone } from '../../../services/phone';
 
 export default function GuestPage() {
   const params = useParams();
   const eventToken = params.eventToken as string;
 
   const [form, setForm] = useState({
-    name: "",
-    phone: "",
+    name: '',
+    phone: '',
     number_of_people: 1,
-    transport_type: "",
-    parking_needed: "No",
-    needs_room: "No",
+    transport_type: '',
+    parking_type: 'None',
+    needs_room: 'No',
   });
 
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('');
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]:
-        name === "number_of_people"
+        name === 'number_of_people'
           ? Number(value)
-          : value,
+          : name === 'phone'
+            ? formatPhoneForInput(value)
+            : value,
     }));
+  };
+
+  const setSelectValue = (name: 'transport_type' | 'parking_type' | 'needs_room', value: string) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const submit = async (e: any) => {
     e.preventDefault();
 
+    if (!form.transport_type) {
+      setStatus('Please select transport type');
+      return;
+    }
+
     try {
-      const eventRes = await api.get(`/events/token/${eventToken}`);
-      const eventId = eventRes.data.id;
-
-      await api.post("/guests/", {
+      await api.post('/guests/rsvp', {
         ...form,
-        event_id: eventId,
+        parking_type: form.parking_type,
+        phone: normalizePhone(form.phone),
+        event_token: eventToken,
       });
 
-      setStatus("RSVP Submitted Successfully 🎉");
-
+      setStatus('RSVP submitted successfully');
       setForm({
-        name: "",
-        phone: "",
+        name: '',
+        phone: '',
         number_of_people: 1,
-        transport_type: "",
-        parking_needed: "No",
-        needs_room: "No",
+        transport_type: '',
+        parking_type: 'None',
+        needs_room: 'No',
       });
-
-    } catch (err) {
-      console.error(err);
-      setStatus("Something went wrong");
+    } catch (err: unknown) {
+      const apiErr = err as AxiosError<{ detail?: string }>;
+      setStatus(apiErr.response?.data?.detail || 'Something went wrong');
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-green-50 p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Wedding RSVP
-        </h1>
+    <main className="min-h-[80vh] flex items-center justify-center px-6 py-8">
+      <section className="premium-card hover:-translate-y-2 transition-all duration-300 w-full max-w-2xl text-center">
+        <h1 className="font-serif text-5xl">Wedding RSVP</h1>
+        <div className="h-px w-40 bg-gradient-to-r from-transparent via-[#C6A75E] to-transparent mx-auto my-6" />
 
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-4 text-left">
+          <input name="name" value={form.name} placeholder="Your Name" required onChange={handleChange} className="premium-input" />
+          <input name="phone" value={form.phone} placeholder="Phone Number" required onChange={handleChange} inputMode="numeric" maxLength={11} className="premium-input" />
+          <input name="number_of_people" type="number" min={1} value={form.number_of_people} placeholder="Total Members" required onChange={handleChange} className="premium-input" />
 
-          <input
-            name="name"
-            value={form.name}
-            placeholder="Your Name"
-            required
-            onChange={handleChange}
-            className="w-full border p-3 rounded-xl"
-          />
-
-          <input
-            name="phone"
-            value={form.phone}
-            placeholder="Phone Number"
-            required
-            onChange={handleChange}
-            className="w-full border p-3 rounded-xl"
-          />
-
-          <input
-            name="number_of_people"
-            type="number"
-            min={1}
-            value={form.number_of_people}
-            placeholder="Total Members"
-            required
-            onChange={handleChange}
-            className="w-full border p-3 rounded-xl"
-          />
-
-          <select
-            name="transport_type"
+          <LuxurySelect
             value={form.transport_type}
-            required
-            onChange={handleChange}
-            className="w-full border p-3 rounded-xl"
-          >
-            <option value="">Transport Type</option>
-            <option value="Bike">Bike</option>
-            <option value="Car">Car</option>
-            <option value="Public Transport">Public Transport</option>
-          </select>
+            options={['Bike', 'Car', 'Public Transport']}
+            placeholder="Transport Type"
+            onChange={(value: string) => setSelectValue('transport_type', value)}
+          />
 
-          <select
-            name="parking_needed"
-            value={form.parking_needed}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-xl"
-          >
-            <option value="No">Parking Needed? No</option>
-            <option value="Yes">Parking Needed? Yes</option>
-          </select>
+          <p className="text-sm text-[var(--text-soft)]">
+            For better event arrangements, please let us know your parking and accommodation needs.
+          </p>
 
-          <select
-            name="needs_room"
-            value={form.needs_room}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-xl"
-          >
-            <option value="No">Room Needed? No</option>
-            <option value="Yes">Room Needed? Yes</option>
-          </select>
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg text-[#1F4F46]">Parking Requirement</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {[
+                { value: 'Car', label: 'Car Parking' },
+                { value: 'Bike', label: 'Bike Parking' },
+                { value: 'None', label: 'No Parking Required' },
+              ].map((option) => (
+                <label
+                  key={option.value}
+                  className={`border rounded-2xl p-4 cursor-pointer hover:border-[#C6A75E] transition-all ${
+                    form.parking_type === option.value
+                      ? 'border-[#C6A75E] bg-[#C6A75E]/10'
+                      : 'border-gray-200 bg-white'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="parking_type"
+                    value={option.value}
+                    checked={form.parking_type === option.value}
+                    onChange={(e) => setSelectValue('parking_type', e.target.value)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm text-[var(--text-dark)]">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-          <button className="w-full bg-green-600 text-white p-3 rounded-xl">
-            Submit RSVP
-          </button>
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg text-[#1F4F46]">Do you need accommodation (room)?</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { value: 'Yes', label: 'Yes, I need a room' },
+                { value: 'No', label: 'No room required' },
+              ].map((option) => (
+                <label
+                  key={option.value}
+                  className={`border rounded-2xl p-4 cursor-pointer hover:border-[#C6A75E] transition-all ${
+                    form.needs_room === option.value
+                      ? 'border-[#C6A75E] bg-[#C6A75E]/10'
+                      : 'border-gray-200 bg-white'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="needs_room"
+                    value={option.value}
+                    checked={form.needs_room === option.value}
+                    onChange={(e) => setSelectValue('needs_room', e.target.value)}
+                    className="sr-only"
+                  />
+                  <span className="text-sm text-[var(--text-dark)]">{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button className="gold-button w-full">Submit RSVP</button>
         </form>
 
-        {status && (
-          <p className="mt-4 text-center text-green-600">{status}</p>
-        )}
-      </div>
+        {status && <p className="mt-4 text-center text-[var(--emerald)]">{status}</p>}
+      </section>
     </main>
   );
 }

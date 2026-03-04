@@ -1,20 +1,22 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import api from "../../../services/api";
+import { useEffect, useState } from 'react';
+import api from '../../../services/api';
+import { formatPhoneForInput, phoneCandidates } from '../../../services/phone';
 
 export default function EntrancePage({ params }: { params: { eventToken: string } }) {
   const { eventToken } = params;
 
   const [event, setEvent] = useState<any>(null);
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState('');
   const [count, setCount] = useState(1);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('');
 
   useEffect(() => {
-    api.get(`/events/token/${eventToken}`)
-      .then(res => setEvent(res.data))
-      .catch(() => setStatus("Event not found"));
+    api
+      .get(`/events/token/${eventToken}`)
+      .then((res) => setEvent(res.data))
+      .catch(() => setStatus('Event not found'));
   }, [eventToken]);
 
   const submit = async (e: React.FormEvent) => {
@@ -23,55 +25,58 @@ export default function EntrancePage({ params }: { params: { eventToken: string 
 
     try {
       const guests = await api.get(`/guests/event/${event.id}`);
-      const guest = guests.data.find((g: any) => g.phone === phone);
+      const candidates = phoneCandidates(phone);
+      const guest = guests.data.find((g: any) => candidates.includes(g.phone));
 
       if (!guest) {
-        setStatus("Guest not found");
+        setStatus('Guest not found');
         return;
       }
 
-      await api.post("/entrance/scan", {
+      await api.post('/entrance/scan', {
         event_id: event.id,
         guest_id: guest.id,
-        actual_people_count: count
+        actual_people_count: count,
       });
 
-      setStatus("Attendance recorded");
+      setStatus('Attendance recorded');
     } catch {
-      setStatus("Error recording attendance");
+      setStatus('Error recording attendance');
     }
   };
 
-  if (!event) return <div className="p-10 text-center">Loading...</div>;
+  if (!event) return <p className="text-center text-[var(--text-soft)] py-16">Loading...</p>;
 
   return (
-    <div className="max-w-xl mx-auto p-10">
-      <h1 className="text-3xl font-bold mb-4">Entrance Check-in</h1>
-      <p className="mb-6">{event.event_name}</p>
+    <main className="min-h-[80vh] flex items-center justify-center px-6 py-8">
+      <section className="premium-card hover:-translate-y-2 transition-all duration-300 w-full max-w-2xl">
+        <h1 className="font-serif text-4xl text-center">Entrance Check-In</h1>
+        <p className="text-center text-[var(--text-soft)] mt-2">{event.event_name}</p>
 
-      <form onSubmit={submit} className="space-y-4">
-        <input
-          placeholder="Guest Phone"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-          required
-          className="w-full border p-2 rounded"
-        />
+        <form onSubmit={submit} className="space-y-4 mt-8">
+          <input
+            placeholder="Guest Phone"
+            value={phone}
+            onChange={(e) => setPhone(formatPhoneForInput(e.target.value))}
+            inputMode="numeric"
+            maxLength={11}
+            required
+            className="premium-input"
+          />
 
-        <input
-          type="number"
-          min={1}
-          value={count}
-          onChange={e => setCount(Number(e.target.value))}
-          className="w-full border p-2 rounded"
-        />
+          <input
+            type="number"
+            min={1}
+            value={count}
+            onChange={(e) => setCount(Number(e.target.value))}
+            className="premium-input"
+          />
 
-        <button className="w-full bg-emerald-600 text-white py-2 rounded">
-          Mark Attendance
-        </button>
-      </form>
+          <button className="gold-button w-full">Mark Attendance</button>
+        </form>
 
-      {status && <p className="mt-4">{status}</p>}
-    </div>
+        {status && <p className="mt-4 text-center text-[var(--emerald)]">{status}</p>}
+      </section>
+    </main>
   );
 }

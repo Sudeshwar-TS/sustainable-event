@@ -1,11 +1,8 @@
-"use client";
+'use client';
 
-import { AxiosError } from "axios";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Bar,
-  Pie,
-} from "react-chartjs-2";
+import { AxiosError } from 'axios';
+import { useEffect, useMemo, useState } from 'react';
+import { Bar, Pie } from 'react-chartjs-2';
 import {
   ArcElement,
   BarElement,
@@ -15,9 +12,9 @@ import {
   LinearScale,
   Title,
   Tooltip,
-} from "chart.js";
-import api from "../../../services/api";
-import { useToast } from "../../../components/ToastContext";
+} from 'chart.js';
+import api from '../../../services/api';
+import { useToast } from '../../../components/ToastContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -40,7 +37,7 @@ type ApiError = { detail?: string };
 export default function DashboardPage({ params }: { params: { eventId: string } }) {
   const { eventId } = params;
   const [data, setData] = useState<Summary | null>(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -51,16 +48,16 @@ export default function DashboardPage({ params }: { params: { eventId: string } 
 
   const load = async () => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
       const res = await api.get<Summary>(`/dashboard/summary/${eventId}`);
       setData(res.data);
-      showToast("Dashboard loaded", "success");
+      showToast('Dashboard loaded', 'success');
     } catch (err) {
       const apiErr = err as AxiosError<ApiError>;
-      const msg = apiErr.response?.data?.detail || "Unable to load dashboard.";
+      const msg = apiErr.response?.data?.detail || 'Unable to load dashboard.';
       setError(msg);
-      showToast(msg, "error");
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }
@@ -69,12 +66,12 @@ export default function DashboardPage({ params }: { params: { eventId: string } 
   const barData = useMemo(() => {
     if (!data) return null;
     return {
-      labels: ["Predicted", "Actual"],
+      labels: ['Predicted', 'Actual'],
       datasets: [
         {
-          label: "Attendance",
+          label: 'Attendance',
           data: [data.predicted_attendance, data.actual_attendance],
-          backgroundColor: ["#22c55e", "#0ea5e9"],
+          backgroundColor: ['#C6A75E', '#1F4F46'],
           borderRadius: 12,
         },
       ],
@@ -90,7 +87,7 @@ export default function DashboardPage({ params }: { params: { eventId: string } 
       datasets: [
         {
           data: values,
-          backgroundColor: ["#16a34a", "#0ea5e9", "#f97316", "#a855f7"],
+          backgroundColor: ['#1F4F46', '#C6A75E', '#A88B4C', '#b89a57'],
           borderWidth: 1,
         },
       ],
@@ -101,83 +98,73 @@ export default function DashboardPage({ params }: { params: { eventId: string } 
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: "bottom" as const },
-      tooltip: { mode: "index" as const },
+      legend: { position: 'bottom' as const },
+      tooltip: { mode: 'index' as const },
     },
   };
 
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-12">
-      <div className="mx-auto w-full max-w-5xl space-y-8">
-        <header className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-emerald-700">SustainaWed</p>
-            <h1 className="text-3xl font-semibold text-slate-900">Event Dashboard</h1>
-            <p className="text-sm text-slate-600">Event ID: {eventId}</p>
+    <main className="space-y-8">
+      <header className="premium-card hover:-translate-y-2 transition-all duration-300 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <p className="text-sm uppercase tracking-[0.25em] text-[var(--text-soft)]">SustainaWed</p>
+          <h1 className="font-serif text-4xl">Event Analytics</h1>
+          <p className="text-sm text-[var(--text-soft)]">Event ID: {eventId}</p>
+        </div>
+        <button onClick={load} disabled={loading} className="gold-button disabled:opacity-60">
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </header>
+
+      {error ? <p className="premium-card text-sm text-red-700">{error}</p> : null}
+
+      <section className="grid gap-4 md:grid-cols-5">
+        {[
+          ['Total RSVPs', data?.total_rsvps ?? '-'],
+          ['Predicted Attendance', data?.predicted_attendance ?? '-'],
+          ['Actual Attendance', data?.actual_attendance ?? '-'],
+          ['Food Saved (kg)', data ? Math.round(data.waste_saved) : '-'],
+          ['CO2 Saved', data ? data.co2_saved.toFixed(1) : '-'],
+        ].map(([label, value]) => (
+          <div key={String(label)} className="premium-card hover:-translate-y-2 transition-all duration-300 p-6">
+            <p className="text-xs uppercase tracking-wide text-[var(--text-soft)]">{label}</p>
+            <p className="mt-2 font-serif text-3xl text-[var(--emerald)]">{value}</p>
           </div>
-          <button
-            onClick={load}
-            disabled={loading}
-            className="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-70"
-          >
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
-        </header>
+        ))}
+      </section>
 
-        {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow">{error}</p> : null}
+      <section className="grid gap-6 md:grid-cols-2">
+        <div className="premium-card hover:-translate-y-2 transition-all duration-300">
+          <h3 className="font-serif text-2xl">Predicted vs Actual</h3>
+          <p className="text-sm text-[var(--text-soft)]">Attendance comparison</p>
+          <div className="mt-4 h-72">{barData ? <Bar data={barData} options={chartOptions} /> : null}</div>
+        </div>
+        <div className="premium-card hover:-translate-y-2 transition-all duration-300">
+          <h3 className="font-serif text-2xl">Transport Distribution</h3>
+          <p className="text-sm text-[var(--text-soft)]">How guests plan to travel</p>
+          <div className="mt-4 h-72">{pieData ? <Pie data={pieData} options={chartOptions} /> : null}</div>
+        </div>
+      </section>
 
-        <section className="grid gap-4 md:grid-cols-5">
-          {[
-            { label: "Total RSVPs", value: data?.total_rsvps ?? "-" },
-            { label: "Predicted Attendance", value: data?.predicted_attendance ?? "-" },
-            { label: "Actual Attendance", value: data?.actual_attendance ?? "-" },
-            { label: "Food Saved (kg)", value: data ? Math.round(data.waste_saved) : "-" },
-            { label: "CO2 Saved", value: data ? data.co2_saved.toFixed(1) : "-" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-100"
-            >
-              <p className="text-xs uppercase tracking-wide text-slate-500">{item.label}</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-900">{item.value}</p>
-            </div>
-          ))}
+      {data ? (
+        <section className="grid gap-4 md:grid-cols-3">
+          <div className="premium-card hover:-translate-y-2 transition-all duration-300 p-6">
+            <p className="text-sm text-[var(--text-soft)]">Predicted Food</p>
+            <p className="mt-1 font-serif text-3xl text-[var(--emerald)]">{data.predicted_food}</p>
+            <p className="text-xs text-[var(--text-soft)]">plates</p>
+          </div>
+          <div className="premium-card hover:-translate-y-2 transition-all duration-300 p-6">
+            <p className="text-sm text-[var(--text-soft)]">Predicted Parking</p>
+            <p className="mt-1 font-serif text-3xl text-[var(--emerald)]">{data.predicted_parking}</p>
+            <p className="text-xs text-[var(--text-soft)]">spots</p>
+          </div>
+          <div className="premium-card hover:-translate-y-2 transition-all duration-300 p-6">
+            <p className="text-sm text-[var(--text-soft)]">Predicted Rooms</p>
+            <p className="mt-1 font-serif text-3xl text-[var(--emerald)]">{data.predicted_rooms}</p>
+            <p className="text-xs text-[var(--text-soft)]">rooms</p>
+          </div>
         </section>
-
-        <section className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-slate-100">
-            <h3 className="text-lg font-semibold text-slate-900">Predicted vs Actual</h3>
-            <p className="text-sm text-slate-500">Attendance comparison</p>
-            <div className="mt-4 h-72">{barData ? <Bar data={barData} options={chartOptions} /> : null}</div>
-          </div>
-          <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-slate-100">
-            <h3 className="text-lg font-semibold text-slate-900">Transport Distribution</h3>
-            <p className="text-sm text-slate-500">How guests plan to travel</p>
-            <div className="mt-4 h-72">{pieData ? <Pie data={pieData} options={chartOptions} /> : null}</div>
-          </div>
-        </section>
-
-        {data ? (
-          <section className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-slate-100">
-              <p className="text-sm text-slate-500">Predicted Food</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-900">{data.predicted_food}</p>
-              <p className="text-xs text-slate-500">plates</p>
-            </div>
-            <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-slate-100">
-              <p className="text-sm text-slate-500">Predicted Parking</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-900">{data.predicted_parking}</p>
-              <p className="text-xs text-slate-500">spots</p>
-            </div>
-            <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-slate-100">
-              <p className="text-sm text-slate-500">Predicted Rooms</p>
-              <p className="mt-1 text-2xl font-semibold text-slate-900">{data.predicted_rooms}</p>
-              <p className="text-xs text-slate-500">rooms</p>
-            </div>
-          </section>
-        ) : null}
-      </div>
+      ) : null}
     </main>
   );
 }
-

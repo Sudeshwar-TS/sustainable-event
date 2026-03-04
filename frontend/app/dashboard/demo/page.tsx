@@ -11,7 +11,7 @@ export default function DashboardDemoRedirect() {
     if (stored) {
       router.replace(`/dashboard/${stored}`);
     } else {
-      router.replace("/create-event");
+      router.replace("/organizer/dashboard");
     }
   }, [router]);
 
