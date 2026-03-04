@@ -114,7 +114,7 @@ def request_otp(data: OTPRequest, db: Session = Depends(get_db)):
     store_otp(phone_clean, otp)
     print(f"DEV OTP for {phone_clean}: {otp}")
 
-    return {"message": "OTP sent successfully", "dev_otp": otp}
+    return {"message": "OTP sent successfully", "otp": otp}
 
 
 @router.post("/verify-otp")

@@ -9,7 +9,7 @@ def generate_event_qr(event_token: str) -> str:
     the wedding RSVP page using the event token.
     """
 
-    url = f"http://localhost:3000/event/{event_token}"
+    url = f"https://sustainable-event.vercel.app/invite/{event_token}"
 
     qr = qrcode.QRCode(
         version=1,
