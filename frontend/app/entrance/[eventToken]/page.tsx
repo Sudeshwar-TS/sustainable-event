@@ -9,6 +9,7 @@ export default function EntrancePage({ params }: { params: { eventToken: string 
 
   const [event, setEvent] = useState<any>(null);
   const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
   const [count, setCount] = useState(1);
   const [status, setStatus] = useState('');
 
@@ -24,24 +25,16 @@ export default function EntrancePage({ params }: { params: { eventToken: string 
     if (!event) return;
 
     try {
-      const guests = await api.get(`/guests/event/${event.id}`);
-      const candidates = phoneCandidates(phone);
-      const guest = guests.data.find((g: any) => candidates.includes(g.phone));
-
-      if (!guest) {
-        setStatus('Guest not found');
-        return;
-      }
-
       await api.post('/entrance/scan', {
-        event_id: event.id,
-        guest_id: guest.id,
-        actual_people_count: count,
+        phone,
+        otp,
+        token: eventToken,
       });
 
       setStatus('Attendance recorded');
-    } catch {
-      setStatus('Error recording attendance');
+    } catch (err: any) {
+      console.error(err);
+      setStatus(err.response?.data?.detail || 'Error recording attendance');
     }
   };
 
@@ -65,10 +58,10 @@ export default function EntrancePage({ params }: { params: { eventToken: string 
           />
 
           <input
-            type="number"
-            min={1}
-            value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
+            placeholder="Enter OTP"
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            required
             className="premium-input"
           />
 

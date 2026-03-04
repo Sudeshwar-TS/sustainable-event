@@ -13,19 +13,27 @@ export default function LoginPage() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [demoOtp, setDemoOtp] = useState('');
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setDemoOtp('');
 
     try {
       const phoneClean = normalizePhone(phone);
-      await api.post('/auth/request-otp', { phone: phoneClean });
+      const res = await api.post('/auth/request-otp', { phone: phoneClean });
+
+      if (res.data.otp) {
+        setDemoOtp(res.data.otp);
+        alert('Demo OTP: ' + res.data.otp);
+      }
 
       showToast('OTP sent to your phone.', 'success');
       router.push(`/verify-otp?phone=${phoneClean}`);
     } catch (err: any) {
+      console.error(err);
       const errorMsg = err.response?.data?.detail || 'Failed to send OTP';
       setError(errorMsg);
       showToast(errorMsg, 'error');
@@ -54,6 +62,12 @@ export default function LoginPage() {
           />
 
           {error && <p className="text-red-600 text-sm">{error}</p>}
+
+          {demoOtp && (
+            <p className="text-green-600 mt-2">
+              Demo OTP: {demoOtp}
+            </p>
+          )}
 
           <button type="submit" disabled={loading} className="gold-button w-full disabled:opacity-60">
             {loading ? 'Sending OTP...' : 'Send OTP'}

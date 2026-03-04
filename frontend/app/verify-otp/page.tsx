@@ -32,6 +32,7 @@ export default function VerifyOtpPage() {
       if (role === 'organizer') router.push('/organizer/dashboard');
       else if (role === 'guest') router.push('/guest/dashboard');
     } catch (err: any) {
+      console.error(err);
       setError(err.response?.data?.detail || 'Invalid OTP');
     } finally {
       setLoading(false);
